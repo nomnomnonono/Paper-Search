@@ -1,9 +1,10 @@
-import polars as pl
-import arxiv
 import os
+
+import arxiv
+import numpy as np
+import polars as pl
 from omegaconf import OmegaConf
 from sentence_transformers import SentenceTransformer
-import numpy as np
 
 
 def scrape_paper(config):
@@ -11,7 +12,7 @@ def scrape_paper(config):
         search = arxiv.Search(
             query=f"cat:{tag} AND ti:fair",
             max_results=10000,
-            sort_by=arxiv.SortCriterion.SubmittedDate
+            sort_by=arxiv.SortCriterion.SubmittedDate,
         )
 
         authors, titles, abstracts, links, years, months = [], [], [], [], [], []
@@ -37,6 +38,7 @@ def scrape_paper(config):
 
         df.write_csv(f"{config.path_data}/paper_{tag}.csv")
         print(f"GET {tag}: {len(df)} Papers !!")
+
 
 def unite_tag(config):
     df = None
