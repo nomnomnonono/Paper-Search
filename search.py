@@ -24,13 +24,13 @@ class Search:
         pred = self.model.encode([title]).squeeze()
         prob = np.dot(self.title_embed, pred)
         rank = np.argsort(prob)[::-1]
-        return self.df.iloc[rank[0 : int(top)]]
+        return self.df.iloc[rank[0 : int(top)]][["title", "link"]]
 
     def search_abst(self, abst, top):
         pred = self.model.encode([abst]).squeeze()
         prob = np.dot(self.abst_embed, pred)
         rank = np.argsort(prob)[::-1]
-        return self.df.iloc[rank[0 : int(top)]]
+        return self.df.iloc[rank[0 : int(top)]][["title", "link"]]
 
     def search_keyword(self, key1, key2, key3, target, top):
         keyword_counts = []
@@ -42,4 +42,4 @@ class Search:
                     count += 1
             keyword_counts.append(count)
         rank = np.argsort(np.array(keyword_counts))[::-1]
-        return self.df.iloc[rank[0 : int(top)]]
+        return self.df.iloc[rank[0 : int(top)]][["title", "link"]]
