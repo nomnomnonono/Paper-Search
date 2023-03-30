@@ -7,7 +7,6 @@ authors = ["nomnomnonono <nozomu.koujiguchi1204@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 notebook = "^6.5.3"
-pysqlite3 = "^0.5.0"
 numpy = "^1.24.2"
 arxiv = "^1.4.3"
 polars = "^0.16.16"
