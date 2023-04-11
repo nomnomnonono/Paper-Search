@@ -2,72 +2,126 @@ import os
 
 import arxiv
 import numpy as np
-import polars as pl
+import pymysql.cursors
 from omegaconf import OmegaConf
 from sentence_transformers import SentenceTransformer
 
 
+def create_database(config):
+    connection = pymysql.connect(
+        user="root", password=config.password, host="localhost"
+    )
+
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute("CREATE DATABASE paper")
+
+            for category in config.category:
+                cursor.execute(
+                    f"""
+                    CREATE TABLE paper.{category} (
+                    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+                    title VARCHAR(200),
+                    abstract TEXT,
+                    author VARCHAR(50),
+                    year INT,
+                    month INT,
+                    link VARCHAR(100)
+                    );
+                    """
+                )
+
+            connection.commit()
+
+    cursor.close()
+
+
 def scrape_paper(config):
-    for tag in config.paper_tags:
+    tags = " OR ".join(config.paper_tags)
+    for category in config.category:
+        data = []
         search = arxiv.Search(
-            query=f"cat:{tag} AND ti:fair",
+            query=f"({tags}) AND ti:{category}",
             max_results=10000,
             sort_by=arxiv.SortCriterion.SubmittedDate,
         )
 
-        authors, titles, abstracts, links, years, months = [], [], [], [], [], []
         for result in search.results():
-            authors.append(str(result.authors[0]))
-            titles.append(result.title)
-            abstracts.append(result.summary)
-            links.append(str(result.links[0]))
             year, month, _ = str(result.published).split(" ")[0].split("-")
-            years.append(year)
-            months.append(month)
+            data.append(
+                (
+                    result.title.replace("'", "").replace('"', ""),
+                    result.summary.replace("'", "").replace('"', ""),
+                    str(result.authors[0]),
+                    int(year),
+                    int(month),
+                    str(result.links[0]),
+                ),
+            )
 
-        df = pl.DataFrame(
-            {
-                "title": titles,
-                "abstract": abstracts,
-                "author": authors,
-                "year": years,
-                "month": months,
-                "link": links,
-            }
+        connection = pymysql.connect(
+            host="localhost",
+            user="root",
+            password=config.password,
+            database="paper",
+            cursorclass=pymysql.cursors.DictCursor,
         )
 
-        df.write_csv(f"{config.path_data}/paper_{tag}.csv")
-        print(f"GET {tag}: {len(df)} Papers !!")
+        with connection:
+            with connection.cursor() as cursor:
+                sql = (
+                    f"INSERT INTO {category} (title, abstract, author, year, month, link)"
+                    + " VALUES ('%s', '%s', '%s', '%d', '%d', '%s')"
+                )
 
+                for i in range(len(data)):
+                    try:
+                        cursor.execute(sql % data[i])
+                    except Exception:
+                        pass
 
-def unite_tag(config):
-    df = None
-    for tag in config.paper_tags:
-        if df is None:
-            df = pl.read_csv(f"{config.path_data}/paper_{tag}.csv")
-        else:
-            tmp = pl.read_csv(f"{config.path_data}/paper_{tag}.csv")
-            df.extend(tmp)
+                connection.commit()
 
-    df = df.unique(subset="title")
-    df.write_csv(f"{config.path_data}/paper.csv")
-    print(f"TOTAL: {len(df)} Papers")
+        print(f"{category} Paper: Get {len(data)} !!")
 
 
 def create_embed(config):
-    df = pl.read_csv(f"{config.path_data}/paper.csv")
     model = SentenceTransformer(config.bert_model)
 
-    for col in ["title", "abstract"]:
-        embed = model.encode(df[col].to_list())
-        np.save(f"{config.path_data}/{col}_embed.npy", embed)
+    for category in config.category:
+        connection = pymysql.connect(
+            host="localhost",
+            user="root",
+            password=config.password,
+            database="paper",
+            cursorclass=pymysql.cursors.DictCursor,
+        )
+
+        with connection:
+            with connection.cursor() as cursor:
+                sql = """
+                SELECT title, abstract FROM Fairness;
+                """
+                cursor.execute(sql)
+
+                titles, abstracts = [], []
+                for row in cursor:
+                    title, abstract = row.values()
+                    titles.append(title)
+                    abstracts.append(abstract)
+                title_embed = model.encode(titles)
+                abstract_embed = model.encode(abstracts)
+                np.save(f"{config.path_data}/{category}_title_embed.npy", title_embed)
+                np.save(
+                    f"{config.path_data}/{category}_abstract_embed.npy", abstract_embed
+                )
 
 
 def main():
     config = OmegaConf.load("config.yaml")
     os.makedirs(config.path_data, exist_ok=True)
+    create_database(config)
     scrape_paper(config)
-    unite_tag(config)
     create_embed(config)
 
 

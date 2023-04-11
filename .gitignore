@@ -2,4 +2,3 @@
 *.ipynb
 data/
 __pycache__
-requirements.txt
