@@ -1,3 +1,5 @@
+password: hogehoge
 path_data: data
 paper_tags: ["cs.LG", "cs.AI", "cs.CV", "stat.ML"]
 bert_model: all-MiniLM-L6-v2
+category: ["Fairness", "Explainability", "Attack"]
