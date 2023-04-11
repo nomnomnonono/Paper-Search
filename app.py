@@ -13,6 +13,14 @@ with gr.Blocks() as demo:
                     title_dropdown = gr.Dropdown(
                         [5, 10, 20, 30, 40, 50], value="20", label="Top K"
                     )
+                    title_category = gr.Dropdown(
+                        ["Fairness", "Explainability", "Attack"],
+                        value="Fairness",
+                        label="Category",
+                    )
+                    title_category.select(
+                        search.setup, inputs=[title_category], outputs=None
+                    )
                     title_button = gr.Button("Search")
                 with gr.Column(scale=2):
                     title_output = gr.Dataframe()
@@ -22,6 +30,14 @@ with gr.Blocks() as demo:
                     abst_input = gr.Textbox(label="Input Abstract")
                     abst_dropdown = gr.Dropdown(
                         [5, 10, 20, 30, 40, 50], value="20", label="Top K"
+                    )
+                    abst_category = gr.Dropdown(
+                        ["Fairness", "Explainability", "Attack"],
+                        value="Fairness",
+                        label="Category",
+                    )
+                    abst_category.select(
+                        search.setup, inputs=[abst_category], outputs=None
                     )
                     abst_button = gr.Button("Search")
                 with gr.Column(scale=2):
@@ -38,6 +54,14 @@ with gr.Blocks() as demo:
                         keyword_input3 = gr.Textbox(label="Keyword 3")
                     keyword_dropdown = gr.Dropdown(
                         [5, 10, 20, 30, 40, 50], value="20", label="Top K"
+                    )
+                    keyword_category = gr.Dropdown(
+                        ["Fairness", "Explainability", "Attack"],
+                        value="Fairness",
+                        label="Category",
+                    )
+                    keyword_category.select(
+                        search.setup, inputs=[keyword_category], outputs=None
                     )
                     keyword_button = gr.Button("Search")
                 with gr.Column(scale=2):
