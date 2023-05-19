@@ -68,7 +68,7 @@ class Search:
 
     def save_as_dataframe(self, rank):
         connection = pymysql.connect(
-            host="localhost",
+            host=self.config.host,
             user="root",
             password=self.config.password,
             database="paper",
@@ -96,13 +96,12 @@ class Search:
         result_list = sorted(rows, key=lambda x: dict[x["id"]])
 
         df = pd.DataFrame([], columns=["title", "url"])
-        for result in result_list:
-            df = df.append(
+        for idx, result in enumerate(result_list):
+            df.loc[idx] = (
                 {
                     "title": result["title"],
                     "url": result["link"],
-                },
-                ignore_index=True,
+                }
             )
 
         return df

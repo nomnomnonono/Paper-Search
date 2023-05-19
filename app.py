@@ -85,4 +85,4 @@ with gr.Blocks() as demo:
         outputs=keyword_output,
     )
 
-demo.launch()
+demo.launch(share=True, server_name="localhost", server_port=8080)

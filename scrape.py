@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 
 def create_database(config):
     connection = pymysql.connect(
-        user="root", password=config.password, host="localhost"
+        user="root", password=config.password, host=config.host,
     )
 
     with connection:
@@ -60,7 +60,7 @@ def scrape_paper(config):
             )
 
         connection = pymysql.connect(
-            host="localhost",
+            host=config.host,
             user="root",
             password=config.password,
             database="paper",
@@ -90,7 +90,7 @@ def create_embed(config):
 
     for category in config.category:
         connection = pymysql.connect(
-            host="localhost",
+            host=config.host,
             user="root",
             password=config.password,
             database="paper",
@@ -120,7 +120,7 @@ def create_embed(config):
 def main():
     config = OmegaConf.load("config.yaml")
     os.makedirs(config.path_data, exist_ok=True)
-    create_database(config)
+    # create_database(config)
     scrape_paper(config)
     create_embed(config)
 
