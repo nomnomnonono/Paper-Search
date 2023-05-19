@@ -9,7 +9,9 @@ from sentence_transformers import SentenceTransformer
 
 def create_database(config):
     connection = pymysql.connect(
-        user="root", password=config.password, host=config.host,
+        user="root",
+        password=config.password,
+        host=config.host,
     )
 
     with connection:

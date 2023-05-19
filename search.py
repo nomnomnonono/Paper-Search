@@ -97,11 +97,9 @@ class Search:
 
         df = pd.DataFrame([], columns=["title", "url"])
         for idx, result in enumerate(result_list):
-            df.loc[idx] = (
-                {
-                    "title": result["title"],
-                    "url": result["link"],
-                }
-            )
+            df.loc[idx] = {
+                "title": result["title"],
+                "url": result["link"],
+            }
 
         return df
