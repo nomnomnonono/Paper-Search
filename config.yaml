@@ -1,5 +1,5 @@
-password: Nonono1204
-host: paper-search-db.co4ghzljb8hb.ap-northeast-1.rds.amazonaws.com
+password: Password
+host: Host name
 path_data: data
 paper_tags: ["cs.LG", "cs.AI", "cs.CV", "stat.ML"]
 bert_model: all-MiniLM-L6-v2
